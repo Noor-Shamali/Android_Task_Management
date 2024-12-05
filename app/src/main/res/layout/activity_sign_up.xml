@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center">
+
+
+        <ImageView
+            android:id="@+id/imageView3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/image" />
+
+        <EditText
+            android:id="@+id/emailField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Email Address"
+            android:inputType="textEmailAddress"
+            android:backgroundTint="#000000"
+            android:textColor="#000000"
+            android:textColorHint="#808080" />
+
+        <TextView
+            android:id="@+id/email_textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#F44336"
+            android:textStyle="bold|italic" />
+
+        <EditText
+            android:id="@+id/firstNameField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="First Name"
+            android:inputType="textPersonName"
+            android:backgroundTint="#000000"
+            android:textColor="#000000"
+            android:textColorHint="#808080" />
+
+        <TextView
+            android:id="@+id/firstName_textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#F44336"
+            android:textStyle="bold|italic" />
+
+        <EditText
+            android:id="@+id/lastNameField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:hint="Last Name"
+            android:inputType="textPersonName"
+            android:backgroundTint="#000000"
+            android:textColor="#000000"
+            android:textColorHint="#808080" />
+
+        <TextView
+            android:id="@+id/lastName_textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#F44336"
+            android:textStyle="bold|italic" />
+
+        <EditText
+            android:id="@+id/passwordField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#000000"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:textColor="#000000"
+            android:textColorHint="#808080" />
+        <TextView
+            android:id="@+id/password_textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#F44336"
+            android:textStyle="bold|italic" />
+
+        <EditText
+            android:id="@+id/confirmPasswordField"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#000000"
+            android:hint="Confirm Password"
+            android:inputType="textPassword"
+            android:textColor="#000000"
+            android:textColorHint="#808080" />
+        <TextView
+            android:id="@+id/confirmPassword_textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#F44336"
+            android:textStyle="bold|italic" />
+
+        <Button
+            android:id="@+id/signUpButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="#6200EE"
+            android:onClick="register"
+            android:text="Sign Up"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+</ScrollView>
