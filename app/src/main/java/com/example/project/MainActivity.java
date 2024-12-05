@@ -5,7 +5,11 @@ import android.os.Bundle;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
+
+    public List<Task> taskList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

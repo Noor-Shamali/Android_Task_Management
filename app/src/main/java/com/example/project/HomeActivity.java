@@ -53,7 +53,7 @@ public class HomeActivity extends AppCompatActivity {
         //navigationActions.put(R.id.nav_all, () -> loadFragment(new AllTasksFragment()));
         //navigationActions.put(R.id.nav_completed, () -> loadFragment(new CompletedTasksFragment()));
         //navigationActions.put(R.id.nav_search, () -> loadFragment(new SearchFragment()));
-        navigationActions.put(R.id.nav_profile, () -> startActivity(new Intent(this, ProfileActivity.class)));
+        navigationActions.put(R.id.nav_get_tasks, () -> startActivity(new Intent(this, GetTasks.class)));
         navigationActions.put(R.id.nav_logout, () -> {
             startActivity(new Intent(this, SignInActivity.class));
             finish();

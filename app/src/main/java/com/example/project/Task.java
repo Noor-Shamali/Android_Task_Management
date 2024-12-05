@@ -1,6 +1,8 @@
 package com.example.project;
 
-public class Task {
+import java.io.Serializable;
+
+public class Task implements Serializable {
     private int id;
     private String title;
     private String description;
@@ -12,6 +14,9 @@ public class Task {
     private int remind;
     private String userId;
 
+    public Task(){
+
+    }
 
     public Task(String title, String description, boolean isCompleted, String priority, String date, String startTime, String endTime, int remind, String userId, int id) {
         this.title = title;
