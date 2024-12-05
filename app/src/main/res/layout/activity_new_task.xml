@@ -1,133 +1,153 @@
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    tools:context=".NewTaskActivity"
-    android:background="@color/white">
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="#FFFFFF">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="New Task"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:textColor="#7B5D9D"
+        android:layout_marginBottom="20dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Task Title"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="6dp" />
+
+    <EditText
+        android:id="@+id/taskTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter task title"
+        android:background="@drawable/input_field"
+        android:padding="10dp"
+        android:textSize="14sp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Task Description"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="6dp" />
+
+    <EditText
+        android:id="@+id/taskDescription"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter task description"
+        android:background="@drawable/input_field"
+        android:padding="10dp"
+        android:minLines="3"
+        android:textSize="14sp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:background="@drawable/rounded_card">
+        android:orientation="horizontal"
+        android:layout_marginTop="12dp">
 
-        <!-- Task Title -->
-        <TextView
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/dueDateButton"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Task Title"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:layout_weight="1"
+            android:text="Select Date"
+            android:background="@drawable/button_style"
+            android:textColor="#FFFFFF"
+            android:padding="8dp"
+            android:textSize="14sp" />
 
-        <EditText
-            android:id="@+id/taskTitle"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/dueTimeButton"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="Enter task title"
-            android:background="@drawable/input_field"
-            android:padding="10dp" />
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Select Time"
+            android:background="@drawable/button_style"
+            android:textColor="#FFFFFF"
+            android:padding="8dp"
+            android:textSize="14sp" />
+    </LinearLayout>
 
-        <!-- Task Description -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Task Description"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Priority Level"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="6dp" />
 
-        <EditText
-            android:id="@+id/taskDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Enter task description"
-            android:background="@drawable/input_field"
-            android:padding="10dp"
-            android:minLines="3" />
+    <Spinner
+        android:id="@+id/prioritySpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/spinner_style"
+        android:padding="8dp"
+        android:textSize="14sp" />
 
-        <!-- Due Date and Time -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Completion Status"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="6dp" />
 
-            <Button
-                android:id="@+id/dueDateButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Select Date"
-                android:background="@drawable/button_style" />
+    <Switch
+        android:id="@+id/completionStatusSwitch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Mark as Complete"
+        android:padding="8dp"
+        android:textSize="14sp" />
 
-            <Button
-                android:id="@+id/dueTimeButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:text="Select Time"
-                android:background="@drawable/button_style" />
-        </LinearLayout>
-
-        <!-- Priority Level -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Priority Level"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp" />
-
-        <Spinner
-            android:id="@+id/prioritySpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/spinner_style"
-            android:entries="@array/priority_options" />
-
-        <!-- Completion Status -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Completion Status"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp" />
-
-        <Switch
-            android:id="@+id/completionStatusSwitch"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Mark as Complete"
-            android:padding="8dp" />
-
-        <!-- Reminder Icon -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Reminder"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="12dp">
 
         <ImageView
             android:id="@+id/reminderIcon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:src="@drawable/ic_reminder"
-            android:layout_gravity="start"
-            android:contentDescription="Reminder Icon"
-            android:layout_marginTop="8dp" />
+            android:contentDescription="Reminder Icon" />
 
-        <!-- Action Icons -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="16dp"
+            android:text="Reminder"
+            android:textSize="16sp"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="12dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
             android:gravity="center">
 
             <ImageView
@@ -135,8 +155,21 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:src="@drawable/ic_edit"
-                android:contentDescription="Edit Icon"
-                android:layout_marginEnd="16dp" />
+                android:contentDescription="Edit Icon" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Edit"
+                android:gravity="center" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_marginStart="32dp">
 
             <ImageView
                 android:id="@+id/deleteIcon"
@@ -144,15 +177,25 @@
                 android:layout_height="48dp"
                 android:src="@drawable/ic_delete"
                 android:contentDescription="Delete Icon" />
-        </LinearLayout>
 
-        <!-- Save Button -->
-        <Button
-            android:id="@+id/saveTaskButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Save Task"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/button_style" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete"
+                android:gravity="center" />
+        </LinearLayout>
     </LinearLayout>
-</ScrollView>
+
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="50dp" />
+
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save Task"
+        android:textColor="#FFFFFF" />
+
+
+</LinearLayout>

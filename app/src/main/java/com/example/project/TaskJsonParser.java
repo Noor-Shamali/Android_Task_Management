@@ -16,16 +16,14 @@ public class TaskJsonParser {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
 
                 Task task = new Task();
-                task.setId(jsonObject.getInt("id"));
                 task.setTitle(jsonObject.getString("title"));
                 task.setDescription(jsonObject.getString("description"));
                 task.setCompleted(jsonObject.getBoolean("isCompleted"));
                 task.setPriority(jsonObject.getString("priority"));
                 task.setDueDate(jsonObject.getString("dueDate"));
-                task.setStartTime(jsonObject.getString("startTime"));
-                task.setEndTime(jsonObject.getString("endTime"));
+                task.setDueTime(jsonObject.getString("dueTime"));
                 task.setRemind(jsonObject.getInt("remind"));
-                task.setUserId(jsonObject.getString("userId"));
+                task.setUserEmail(jsonObject.getString("userEmail"));
 
                 tasks.add(task);
             }

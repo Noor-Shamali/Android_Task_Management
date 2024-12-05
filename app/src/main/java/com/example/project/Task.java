@@ -3,40 +3,27 @@ package com.example.project;
 import java.io.Serializable;
 
 public class Task implements Serializable {
-    private int id;
     private String title;
     private String description;
     private boolean isCompleted;
     private String priority;
     private String dueDate;
-    private String startTime;
-    private String endTime;
+    private String dueTime;
     private int remind;
-    private String userId;
+    private String userEmail;
 
-    public Task(){
-
+    public Task() {
     }
 
-    public Task(String title, String description, boolean isCompleted, String priority, String date, String startTime, String endTime, int remind, String userId, int id) {
+    public Task(String title, String description, boolean isCompleted, String priority, String dueDate, String dueTime, int remind, String userEmail) {
         this.title = title;
         this.description = description;
         this.isCompleted = isCompleted;
         this.priority = priority;
-        this.dueDate = date;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.dueDate = dueDate;
+        this.dueTime = dueTime;
         this.remind = remind;
-        this.userId = userId;
-        this.id = id;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+        this.userEmail = userEmail;
     }
 
     public String getTitle() {
@@ -79,20 +66,12 @@ public class Task implements Serializable {
         this.dueDate = dueDate;
     }
 
-    public String getStartTime() {
-        return startTime;
+    public String getDueTime() {
+        return dueTime;
     }
 
-    public void setStartTime(String startTime) {
-        this.startTime = startTime;
-    }
-
-    public String getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(String endTime) {
-        this.endTime = endTime;
+    public void setDueTime(String dueTime) {
+        this.dueTime = dueTime;
     }
 
     public int getRemind() {
@@ -103,27 +82,25 @@ public class Task implements Serializable {
         this.remind = remind;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getUserEmail() {
+        return userEmail;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 
     @Override
     public String toString() {
         return "Task{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
+                "title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", isCompleted=" + isCompleted +
                 ", priority='" + priority + '\'' +
                 ", dueDate='" + dueDate + '\'' +
-                ", startTime='" + startTime + '\'' +
-                ", endTime='" + endTime + '\'' +
+                ", dueTime='" + dueTime + '\'' +
                 ", remind=" + remind +
-                ", userId='" + userId + '\'' +
+                ", userEmail='" + userEmail + '\'' +
                 '}';
     }
 }

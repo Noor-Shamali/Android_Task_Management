@@ -1,0 +1,37 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F7F8FA"
+    android:padding="16dp">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/todayTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Today's Tasks"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#3D3D3D"
+        android:gravity="center_horizontal"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Empty View -->
+    <TextView
+        android:id="@+id/empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="No tasks for today."
+        android:textSize="18sp"
+        android:textColor="#3D3D3D"
+        android:visibility="gone"/>
+
+    <!-- RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewTasks"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/todayTitle"
+        android:clipToPadding="false" />
+</RelativeLayout>
