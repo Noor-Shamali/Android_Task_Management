@@ -16,7 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 public class ProfileActivity extends AppCompatActivity {
 
     private EditText emailEditText, passwordEditText;
-    private TextView usernameText, lastNameTextView;
+    private TextView usernameText;
     private Button saveButton;
     private DataBaseHelper dbHelper;
     private SharedPreference sharedPreference;
@@ -48,7 +48,8 @@ public class ProfileActivity extends AppCompatActivity {
                     return;
                 }
 
-                if(dbHelper.isEmailUsed(email)){
+                if(!getIntent().getStringExtra("email").equals(email)
+                        && dbHelper.isEmailUsed(email)){
                     Toast.makeText(ProfileActivity.this, "Email address is used", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -109,6 +110,7 @@ public class ProfileActivity extends AppCompatActivity {
         String oldEmail = getIntent().getStringExtra("email");
         dbHelper.updateEmail(oldEmail, email);
         getIntent().putExtra("email", email);
+        // TODO propagate new email to home activity.
         Toast.makeText(ProfileActivity.this, "Email updated successfully", Toast.LENGTH_SHORT).show();
     }
 
