@@ -19,15 +19,22 @@ public class HomeActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private final Map<Integer, Runnable> navigationActions = new HashMap<>();
+    String email;
+    TodayFragment todayFragment;
+    String UserName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        email = getIntent().getStringExtra("userEmail");
+        UserName = getIntent().getStringExtra("userName");
+
         // Set up Toolbar
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
 
         // Set up DrawerLayout
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -40,6 +47,9 @@ public class HomeActivity extends AppCompatActivity {
         // Set up NavigationView
         navigationView = findViewById(R.id.nav_view);
 
+        todayFragment = new TodayFragment();
+        loadFragment(todayFragment);
+
         // Initialize the navigation actions
         initializeNavigationActions();
 
@@ -48,12 +58,12 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void initializeNavigationActions() {
-     //   navigationActions.put(R.id.nav_today, () -> loadFragment(new TodayFragment()));
-       navigationActions.put(R.id.nav_new_task, () -> startActivity(new Intent(this, NewTaskActivity.class)));
+       navigationActions.put(R.id.nav_today, () -> loadFragment(todayFragment));
+       navigationActions.put(R.id.nav_new_task, this::gotToNewActivity);
         //navigationActions.put(R.id.nav_all, () -> loadFragment(new AllTasksFragment()));
         //navigationActions.put(R.id.nav_completed, () -> loadFragment(new CompletedTasksFragment()));
         //navigationActions.put(R.id.nav_search, () -> loadFragment(new SearchFragment()));
-        navigationActions.put(R.id.nav_profile, () -> startActivity(new Intent(this, ProfileActivity.class)));
+        navigationActions.put(R.id.nav_get_tasks, () -> startActivity(new Intent(this, GetTasks.class)));
         navigationActions.put(R.id.nav_logout, () -> {
             startActivity(new Intent(this, SignInActivity.class));
             finish();
@@ -73,7 +83,16 @@ public class HomeActivity extends AppCompatActivity {
     private void loadFragment(Fragment fragment) {
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.content_frame, fragment)
+                .replace(R.id.content_frame, fragment, "TodayFragment")  // Make sure this ID exists in your layout
                 .commit();
+    }
+
+
+
+
+    private void gotToNewActivity(){
+        Intent intent = new Intent(this, NewTaskActivity.class);
+        intent.putExtra("email", email);
+        startActivity(intent);
     }
 }

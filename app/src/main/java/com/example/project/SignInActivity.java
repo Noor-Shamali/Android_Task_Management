@@ -75,7 +75,10 @@ public class SignInActivity extends AppCompatActivity {
                         sharedPreference.clearEmail();
                     }
                     Toast.makeText(SignInActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(SignInActivity.this, HomeActivity.class));
+                    Intent intent = new Intent(SignInActivity.this, HomeActivity.class);
+                    intent.putExtra("userEmail", email);
+                    intent.putExtra("userName", dpHelper.getUserName(email));
+                    startActivity(intent);
                     finish();
                 } else {
                     Toast.makeText(SignInActivity.this, "Invalid credentials.", Toast.LENGTH_SHORT).show();
