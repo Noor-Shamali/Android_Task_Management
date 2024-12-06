@@ -1,11 +1,16 @@
 package com.example.project;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 
@@ -22,11 +27,15 @@ public class HomeActivity extends AppCompatActivity {
     String email;
     TodayFragment todayFragment;
     String UserName;
+    SharedPreference sharedPreference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        // Initialize shared preference object
+        sharedPreference = new SharedPreference(this);
 
         email = getIntent().getStringExtra("userEmail");
         UserName = getIntent().getStringExtra("userName");
@@ -35,6 +44,8 @@ public class HomeActivity extends AppCompatActivity {
         androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        ImageView moonIcon = toolbar.findViewById(R.id.moon_icon);
+        moonIcon.setOnClickListener(v -> toggleNightMode());  // Toggle night mode on click
 
         // Set up DrawerLayout
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -47,6 +58,14 @@ public class HomeActivity extends AppCompatActivity {
         // Set up NavigationView
         navigationView = findViewById(R.id.nav_view);
 
+        // Set user details in the header
+        View headerView = navigationView.getHeaderView(0);
+        TextView userNameTextView = headerView.findViewById(R.id.user_name);
+        TextView userEmailTextView = headerView.findViewById(R.id.user_email);
+        userNameTextView.setText(UserName);
+        userEmailTextView.setText(email);
+
+        // Load default fragment
         todayFragment = new TodayFragment();
         loadFragment(todayFragment);
 
@@ -58,12 +77,11 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void initializeNavigationActions() {
-       navigationActions.put(R.id.nav_today, () -> loadFragment(todayFragment));
-       navigationActions.put(R.id.nav_new_task, this::gotToNewActivity);
-        //navigationActions.put(R.id.nav_all, () -> loadFragment(new AllTasksFragment()));
-        //navigationActions.put(R.id.nav_completed, () -> loadFragment(new CompletedTasksFragment()));
-        //navigationActions.put(R.id.nav_search, () -> loadFragment(new SearchFragment()));
-        navigationActions.put(R.id.nav_get_tasks, () -> goToGetTasks());
+        navigationActions.put(R.id.nav_today, () -> loadFragment(todayFragment));
+        navigationActions.put(R.id.nav_new_task, this::getToNewActivity);
+        navigationActions.put(R.id.nav_all, this::getToAllTasksActivity);
+        navigationActions.put(R.id.nav_completed, this::getToCompletedTasksActivity);
+        navigationActions.put(R.id.nav_get_tasks, this::goToGetTasks);
         navigationActions.put(R.id.nav_logout, () -> {
             startActivity(new Intent(this, SignInActivity.class));
             finish();
@@ -81,24 +99,48 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void loadFragment(Fragment fragment) {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.content_frame, fragment, "TodayFragment")  // Make sure this ID exists in your layout
-                .commit();
+        // Check if fragment is already in the fragment manager before replacing
+        if (fragment != null) {
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.content_frame, fragment)
+                    .commit();
+        }
     }
 
-
-
-
-    private void gotToNewActivity(){
+    private void getToNewActivity() {
         Intent intent = new Intent(this, NewTaskActivity.class);
         intent.putExtra("email", email);
         startActivity(intent);
     }
 
-    private void goToGetTasks(){
+    private void goToGetTasks() {
         Intent intent = new Intent(this, GetTasks.class);
         intent.putExtra("email", email);
         startActivity(intent);
+    }
+
+    private void getToAllTasksActivity() {
+        Intent intent = new Intent(this, AllTasksActivity.class);
+        intent.putExtra("email", email);
+        startActivity(intent);
+    }
+
+    private void getToCompletedTasksActivity() {
+        Intent intent = new Intent(this, CompletedTasksActivity.class);
+        intent.putExtra("email", email);
+        startActivity(intent);
+    }
+
+    // Toggle night mode
+    private void toggleNightMode() {
+        boolean currentNightMode = sharedPreference.readDarkMode("Mode",false);
+        if (currentNightMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO); // Switch to light mode
+            sharedPreference.writeDarkMode("Mode", false);  // Save mode preference
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES); // Switch to dark mode
+            sharedPreference.writeDarkMode("Mode", true);  // Save mode preference
+        }
     }
 }

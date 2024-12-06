@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
     android:padding="16dp">
 
     <LinearLayout
@@ -24,10 +23,10 @@
             android:layout_height="wrap_content"
             android:hint="Email Address"
             android:inputType="textEmailAddress"
-            android:backgroundTint="#000000"
-            android:textColor="#000000"
-            android:textColorHint="#808080"
-        android:layout_marginBottom="16dp" />
+            android:backgroundTint="@color/edittext_tint"
+            android:textColor="@color/text_color"
+            android:textColorHint="@color/text_hint_color"
+            android:layout_marginBottom="16dp" />
 
         <EditText
             android:id="@+id/passwordField"
@@ -35,17 +34,17 @@
             android:layout_height="wrap_content"
             android:hint="Password"
             android:inputType="textPassword"
-            android:backgroundTint="#000000"
-            android:textColor="#000000"
-            android:textColorHint="#808080"
-        android:layout_marginBottom="8dp" />
+            android:backgroundTint="@color/edittext_tint"
+            android:textColor="@color/text_color"
+            android:textColorHint="@color/text_hint_color"
+            android:layout_marginBottom="8dp" />
 
         <CheckBox
             android:id="@+id/rememberMeCheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Remember Me"
-            android:textColor="#000000"
+            android:textColor="@color/text_color"
             android:layout_marginBottom="16dp"
             android:layout_gravity="start" />
 
@@ -54,8 +53,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Log In"
-            android:background="#6200EE"
-            android:textColor="#FFFFFF"
+            android:backgroundTint="@color/button_background"
+            android:textColor="@color/button_text_color"
             android:layout_marginBottom="16dp"
             android:onClick="login" />
 
@@ -64,7 +63,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Don't have an account? Sign up"
-            android:textColor="#6200EE"
+            android:textColor="@color/link_color"
             android:gravity="center"
             android:layout_marginTop="10dp"
             android:textSize="14sp"

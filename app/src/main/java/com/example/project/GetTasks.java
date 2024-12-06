@@ -45,8 +45,10 @@ public class GetTasks extends AppCompatActivity {
     public void saveToDataBase(List<Task> tasks) {
         DataBaseHelper dbHelper = new DataBaseHelper(this);
         for (Task task : tasks) {
-            task.setUserEmail(userEmail);
-            dbHelper.addTask(task);
+            if(!dbHelper.isTaskStored(task.getTitle(), task.getDueDate(), task.getDueTime())){
+                task.setUserEmail(userEmail);
+                dbHelper.addTask(task);
+            }
         }
     }
 }

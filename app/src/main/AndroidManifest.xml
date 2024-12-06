@@ -15,6 +15,12 @@
         android:theme="@style/Theme.Project"
         tools:targetApi="31">
         <activity
+            android:name=".CompletedTasksActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AllTasksActivity"
+            android:exported="false" />
+        <activity
             android:name=".TaskDetailsActivity"
             android:exported="false" />
         <activity

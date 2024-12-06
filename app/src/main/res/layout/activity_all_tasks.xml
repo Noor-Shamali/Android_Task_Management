@@ -5,34 +5,32 @@
 
     <!-- Title -->
     <TextView
-        android:id="@+id/todayTitle"
+        android:id="@+id/allTasksTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Today's Tasks"
+        android:text="All Tasks"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:textColor="@color/text_color"
+        android:textColor="@color/button_primary_color"
         android:gravity="center_horizontal"
-        android:layout_marginBottom="16dp"
-        android:visibility="gone" /> <!-- Initially hidden -->
+        android:layout_marginBottom="16dp" />
 
     <!-- Empty View -->
     <TextView
-        android:id="@+id/empty_view"
+        android:id="@+id/emptyView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="No tasks for today."
+        android:text="No tasks available."
         android:textSize="18sp"
-        android:textColor="#3D3D3D"
+        android:textColor="@color/button_primary_color"
         android:visibility="gone"
-        android:layout_centerInParent="true"/> <!-- Centered in the parent -->
+        android:layout_centerInParent="true" />
 
     <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerViewTasks"
+        android:id="@+id/recyclerViewAllTasks"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/todayTitle"
+        android:layout_below="@id/allTasksTitle"
         android:clipToPadding="false" />
 </RelativeLayout>
