@@ -63,7 +63,7 @@ public class HomeActivity extends AppCompatActivity {
         //navigationActions.put(R.id.nav_all, () -> loadFragment(new AllTasksFragment()));
         //navigationActions.put(R.id.nav_completed, () -> loadFragment(new CompletedTasksFragment()));
         //navigationActions.put(R.id.nav_search, () -> loadFragment(new SearchFragment()));
-        navigationActions.put(R.id.nav_get_tasks, () -> startActivity(new Intent(this, GetTasks.class)));
+        navigationActions.put(R.id.nav_get_tasks, () -> goToGetTasks());
         navigationActions.put(R.id.nav_logout, () -> {
             startActivity(new Intent(this, SignInActivity.class));
             finish();
@@ -92,6 +92,12 @@ public class HomeActivity extends AppCompatActivity {
 
     private void gotToNewActivity(){
         Intent intent = new Intent(this, NewTaskActivity.class);
+        intent.putExtra("email", email);
+        startActivity(intent);
+    }
+
+    private void goToGetTasks(){
+        Intent intent = new Intent(this, GetTasks.class);
         intent.putExtra("email", email);
         startActivity(intent);
     }

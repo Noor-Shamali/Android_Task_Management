@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -35,21 +34,23 @@ public class TodayFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_today, container, false);
 
+        // Initialize RecyclerView
         recyclerViewTasks = view.findViewById(R.id.recyclerViewTasks);
         recyclerViewTasks.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        // Initialize the task list and adapter
         taskList = new ArrayList<>();
         taskAdapter = new TaskAdapter(taskList);
         recyclerViewTasks.setAdapter(taskAdapter);
 
         // Load today's tasks
-        loadTodayTasks(view);  // Pass the 'view' object to loadTodayTasks()
+        loadTodayTasks(view);
 
         return view;
     }
 
     private void loadTodayTasks(View view) {
-        // Get today's date
+        // Get today's date in "dd/MM/yyyy" format
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         String todayDate = dateFormat.format(new Date());
 
@@ -57,19 +58,22 @@ public class TodayFragment extends Fragment {
         DataBaseHelper dbHelper = new DataBaseHelper(getContext());
         List<Task> todaysTasks = dbHelper.getTodaysTasks(todayDate);
 
-        // Get the empty view to show when no tasks are available
-        TextView emptyView = view.findViewById(R.id.empty_view);  // Use 'view' here
+        // Get views
+        TextView todayTitle = view.findViewById(R.id.todayTitle);
+        TextView emptyView = view.findViewById(R.id.empty_view);
 
-        if (todaysTasks.isEmpty()) {
+        if (todaysTasks == null || todaysTasks.isEmpty()) {
             // No tasks for today
-            recyclerViewTasks.setVisibility(View.GONE);
-            emptyView.setVisibility(View.VISIBLE);
+            todayTitle.setVisibility(View.GONE); // Keep the title visible
+            recyclerViewTasks.setVisibility(View.GONE); // Hide RecyclerView
+            emptyView.setVisibility(View.VISIBLE); // Show empty view
         } else {
-            // Tasks found, update the RecyclerView
-            recyclerViewTasks.setVisibility(View.VISIBLE);
-            emptyView.setVisibility(View.GONE);
+            // Tasks found
+            todayTitle.setVisibility(View.VISIBLE); // Show the title
+            recyclerViewTasks.setVisibility(View.VISIBLE); // Show RecyclerView
+            emptyView.setVisibility(View.GONE); // Hide empty view
 
-            // Update task list and notify adapter
+            // Update task list and refresh adapter
             taskList.clear();
             taskList.addAll(todaysTasks);
             taskAdapter.notifyDataSetChanged();

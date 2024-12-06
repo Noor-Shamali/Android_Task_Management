@@ -14,18 +14,20 @@
         android:textStyle="bold"
         android:textColor="#3D3D3D"
         android:gravity="center_horizontal"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="16dp"
+        android:visibility="gone" /> <!-- Initially hidden -->
 
     <!-- Empty View -->
     <TextView
         android:id="@+id/empty_view"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:text="No tasks for today."
         android:textSize="18sp"
         android:textColor="#3D3D3D"
-        android:visibility="gone"/>
+        android:visibility="gone"
+        android:layout_centerInParent="true"/> <!-- Centered in the parent -->
 
     <!-- RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView

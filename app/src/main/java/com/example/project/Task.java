@@ -26,6 +26,16 @@ public class Task implements Serializable {
         this.userEmail = userEmail;
     }
 
+    public Task(String title, String description, boolean isCompleted, String priority, String dueDate, String dueTime, int remind) {
+        this.title = title;
+        this.description = description;
+        this.isCompleted = isCompleted;
+        this.priority = priority;
+        this.dueDate = dueDate;
+        this.dueTime = dueTime;
+        this.remind = remind;
+    }
+
     public String getTitle() {
         return title;
     }
