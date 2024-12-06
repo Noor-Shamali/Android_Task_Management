@@ -297,4 +297,24 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return taskList;
     }
 
+    public boolean updateEmail(String oldEmail, String newEmail) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(EMAIL, newEmail);
+
+        int rowsAffected = db.update(TABLE_USERS, values, EMAIL + " = ?", new String[]{oldEmail});
+        db.close();
+        return rowsAffected > 0;
+    }
+
+    public boolean updatePassword(String email, String newPassword) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(PASSWORD, newPassword);
+
+        int rowsAffected = db.update(TABLE_USERS, values, EMAIL + " = ?", new String[]{email});
+        db.close();
+        return rowsAffected > 0;
+    }
+
 }

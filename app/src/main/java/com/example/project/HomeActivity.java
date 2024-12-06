@@ -80,12 +80,20 @@ public class HomeActivity extends AppCompatActivity {
         navigationActions.put(R.id.nav_today, () -> loadFragment(todayFragment));
         navigationActions.put(R.id.nav_new_task, this::getToNewActivity);
         navigationActions.put(R.id.nav_all, this::getToAllTasksActivity);
+        navigationActions.put(R.id.nav_search, this::goToSearchTasksActivity);
         navigationActions.put(R.id.nav_completed, this::getToCompletedTasksActivity);
         navigationActions.put(R.id.nav_get_tasks, this::goToGetTasks);
+        navigationActions.put(R.id.nav_profile, this::getMyProfile);
         navigationActions.put(R.id.nav_logout, () -> {
             startActivity(new Intent(this, SignInActivity.class));
             finish();
         });
+    }
+
+    private void getMyProfile() {
+        Intent intent = new Intent(this, ProfileActivity.class);
+        intent.putExtra("email", email);
+        startActivity(intent);
     }
 
     private boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -129,6 +137,11 @@ public class HomeActivity extends AppCompatActivity {
     private void getToCompletedTasksActivity() {
         Intent intent = new Intent(this, CompletedTasksActivity.class);
         intent.putExtra("email", email);
+        startActivity(intent);
+    }
+
+    private void goToSearchTasksActivity() {
+        Intent intent = new Intent(this, SearchTasksActivity.class);
         startActivity(intent);
     }
 
