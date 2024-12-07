@@ -2,6 +2,9 @@ package com.example.project;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,6 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -17,6 +22,10 @@ public class AllTasksActivity extends AppCompatActivity {
 
     private RecyclerView recyclerViewAllTasks;
     private TextView emptyView;
+    private Spinner sortSpinner;
+
+    private Map<String, List<Task>> groupedTasks = new TreeMap<>();
+    private AllTasksAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,39 +34,89 @@ public class AllTasksActivity extends AppCompatActivity {
 
         recyclerViewAllTasks = findViewById(R.id.recyclerViewAllTasks);
         emptyView = findViewById(R.id.emptyView);
+        sortSpinner = findViewById(R.id.sortSpinner);
 
-        // Sample tasks (replace with your database or API call)
         List<Task> taskList = fetchTasks();
-
-        // Group tasks by date
-        Map<String, List<Task>> groupedTasks = groupTasksByDate(taskList);
+        groupedTasks = groupTasksByDate(taskList);
 
         if (groupedTasks.isEmpty()) {
-            emptyView.setVisibility(View.VISIBLE);
+            showEmptyView();
         } else {
-            emptyView.setVisibility(View.GONE);
-
-            // Set up the adapter
-            AllTasksAdapter adapter = new AllTasksAdapter(groupedTasks);
-            recyclerViewAllTasks.setLayoutManager(new LinearLayoutManager(this));
-            recyclerViewAllTasks.setAdapter(adapter);
+            setupRecyclerView();
+            setupSortSpinner(sortSpinner);
         }
     }
 
     private List<Task> fetchTasks() {
-        DataBaseHelper dbHelper = new DataBaseHelper(this); // Pass the context to the helper
-        return dbHelper.getAllTasks(); // Fetch tasks from the database
+        DataBaseHelper dbHelper = new DataBaseHelper(this);
+        return dbHelper.getAllTasks();
     }
 
     private Map<String, List<Task>> groupTasksByDate(List<Task> tasks) {
-        Map<String, List<Task>> groupedTasks = new TreeMap<>(); // TreeMap to keep keys sorted by date
+        Map<String, List<Task>> grouped = new TreeMap<>();
         for (Task task : tasks) {
             String date = task.getDueDate();
-            if (!groupedTasks.containsKey(date)) {
-                groupedTasks.put(date, new ArrayList<>());
-            }
-            groupedTasks.get(date).add(task);
+            grouped.computeIfAbsent(date, k -> new ArrayList<>()).add(task);
         }
-        return groupedTasks;
+        return grouped;
+    }
+
+    private void sortTasksByPriority(Map<String, List<Task>> tasks) {
+        for (List<Task> taskGroup : tasks.values()) {
+            Collections.sort(taskGroup, Comparator.comparingInt(this::getPriorityValue).reversed());
+        }
+    }
+
+    private int getPriorityValue(Task task) {
+        switch (task.getPriority().toLowerCase()) {
+            case "high": return 3;
+            case "medium": return 2;
+            case "low": return 1;
+            default: return 0;
+        }
+    }
+
+    private void setupRecyclerView() {
+        emptyView.setVisibility(View.GONE);
+        recyclerViewAllTasks.setVisibility(View.VISIBLE);
+
+        adapter = new AllTasksAdapter(groupedTasks);
+        recyclerViewAllTasks.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewAllTasks.setAdapter(adapter);
+    }
+
+    private void setupSortSpinner(Spinner sortSpinner) {
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                this,
+                R.array.sort_options,
+                android.R.layout.simple_spinner_item
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sortSpinner.setAdapter(adapter);
+
+        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position == 0) {
+                    groupedTasks = groupTasksByDate(fetchTasks());
+                } else if (position == 1) {
+                    sortTasksByPriority(groupedTasks);
+                }
+                updateRecyclerView();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    private void updateRecyclerView() {
+        adapter = new AllTasksAdapter(groupedTasks);
+        recyclerViewAllTasks.setAdapter(adapter);
+    }
+
+    private void showEmptyView() {
+        emptyView.setVisibility(View.VISIBLE);
+        recyclerViewAllTasks.setVisibility(View.GONE);
     }
 }

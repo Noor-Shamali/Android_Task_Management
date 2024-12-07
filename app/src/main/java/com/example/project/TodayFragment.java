@@ -1,17 +1,24 @@
 package com.example.project;
 
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -46,6 +53,10 @@ public class TodayFragment extends Fragment {
         // Load today's tasks
         loadTodayTasks(view);
 
+        // Initialize sorting dropdown
+        Spinner sortSpinner = view.findViewById(R.id.sortSpinner);
+        setupSortSpinner(sortSpinner);
+
         return view;
     }
 
@@ -64,7 +75,7 @@ public class TodayFragment extends Fragment {
 
         if (todaysTasks == null || todaysTasks.isEmpty()) {
             // No tasks for today
-            todayTitle.setVisibility(View.GONE); // Keep the title visible
+            todayTitle.setVisibility(View.GONE); // Hide the title
             recyclerViewTasks.setVisibility(View.GONE); // Hide RecyclerView
             emptyView.setVisibility(View.VISIBLE); // Show empty view
         } else {
@@ -77,6 +88,63 @@ public class TodayFragment extends Fragment {
             taskList.clear();
             taskList.addAll(todaysTasks);
             taskAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void setupSortSpinner(Spinner sortSpinner) {
+        // Create sorting options
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                getContext(),
+                R.array.sort_options, // Defined in res/values/strings.xml
+                android.R.layout.simple_spinner_item
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        sortSpinner.setAdapter(adapter);
+
+        // Set sorting functionality
+        sortSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position) {
+                    case 0: // Default order
+                        loadTodayTasks(getView());
+                        break;
+                    case 1: // Sort by priority (High to Low)
+                        sortTasksByPriority();
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
+    }
+
+    private void sortTasksByPriority() {
+        // Sort taskList based on priority (High > Medium > Low)
+        Collections.sort(taskList, new Comparator<Task>() {
+            @Override
+            public int compare(Task task1, Task task2) {
+                return getPriorityValue(task2.getPriority()) - getPriorityValue(task1.getPriority());
+            }
+        });
+
+        // Refresh adapter
+        taskAdapter.notifyDataSetChanged();
+    }
+
+    private int getPriorityValue(String priority) {
+        switch (priority.toLowerCase()) {
+            case "high":
+                return 3;
+            case "medium":
+                return 2;
+            case "low":
+                return 1;
+            default:
+                return 0; // Default for unknown priorities
         }
     }
 }

@@ -25,7 +25,7 @@ public class SearchTasksActivity extends AppCompatActivity {
     private TextView startDateTextView, endDateTextView;
     private Button searchButton;
     private TaskAdapter taskAdapter;
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -7,12 +7,12 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="New Task"
+        android:text="Edit Task"
         android:textSize="24sp"
         android:textStyle="bold"
         android:gravity="center"
         android:textColor="@color/title_text_color"
-    android:layout_marginBottom="20dp" />
+        android:layout_marginBottom="20dp" />
 
     <TextView
         android:layout_width="match_parent"
@@ -24,10 +24,11 @@
         android:textColor="@color/label_text_color" />
 
     <EditText
-        android:id="@+id/taskTitle"
+        android:id="@+id/editTaskTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Enter task title"
+        android:background="@drawable/input_field"
         android:padding="10dp"
         android:textSize="14sp"
         android:textColor="@color/input_text_color"
@@ -44,10 +45,11 @@
         android:textColor="@color/label_text_color" />
 
     <EditText
-        android:id="@+id/taskDescription"
+        android:id="@+id/editTaskDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Enter task description"
+        android:background="@drawable/input_field"
         android:padding="10dp"
         android:minLines="3"
         android:textSize="14sp"
@@ -61,7 +63,7 @@
         android:layout_marginTop="12dp">
 
         <Button
-            android:id="@+id/dueDateButton"
+            android:id="@+id/editDueDateButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -72,7 +74,7 @@
             android:textSize="14sp" />
 
         <Button
-            android:id="@+id/dueTimeButton"
+            android:id="@+id/editDueTimeButton"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -95,7 +97,7 @@
         android:textColor="@color/label_text_color" />
 
     <Spinner
-        android:id="@+id/prioritySpinner"
+        android:id="@+id/editPrioritySpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/spinner_style"
@@ -112,7 +114,7 @@
         android:textColor="@color/label_text_color" />
 
     <Switch
-        android:id="@+id/completionStatusSwitch"
+        android:id="@+id/editCompletionStatusSwitch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Mark as Complete"
@@ -124,16 +126,25 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_marginTop="12dp">
+        android:layout_marginTop="16dp">
 
         <Button
-            android:id="@+id/saveButton"
-            android:layout_width="match_parent"
+            android:id="@+id/saveEditButton"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Save Task"
+            android:text="Save Changes"
             android:backgroundTint="@color/button_primary_color"
             android:textColor="@color/button_text_color"
-            android:layout_marginTop="16dp"
+            android:padding="12dp"
+            android:layout_marginEnd="8dp" />
+
+        <Button
+            android:id="@+id/cancelEditButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:backgroundTint="@color/button_secondary_color"
+            android:textColor="@color/button_text_color"
             android:padding="12dp" />
     </LinearLayout>
 </LinearLayout>

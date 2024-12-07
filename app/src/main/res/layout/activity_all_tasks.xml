@@ -1,4 +1,5 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp">
@@ -6,14 +7,34 @@
     <!-- Title -->
     <TextView
         android:id="@+id/allTasksTitle"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="All Tasks"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/button_primary_color"
-        android:gravity="center_horizontal"
+        android:gravity="center"
+        android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp" />
+
+    <!-- Sort Spinner Container -->
+    <LinearLayout
+        android:id="@+id/sortContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/allTasksTitle"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/spinner_background"
+        android:padding="8dp"
+        android:elevation="4dp">
+
+        <Spinner
+            android:id="@+id/sortSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical" />
+    </LinearLayout>
 
     <!-- Empty View -->
     <TextView
@@ -23,6 +44,7 @@
         android:text="No tasks available."
         android:textSize="18sp"
         android:textColor="@color/button_primary_color"
+        android:gravity="center"
         android:visibility="gone"
         android:layout_centerInParent="true" />
 
@@ -30,7 +52,8 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewAllTasks"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/allTasksTitle"
-        android:clipToPadding="false" />
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sortContainer"
+        android:clipToPadding="false"
+        android:layout_marginTop="8dp" />
 </RelativeLayout>
