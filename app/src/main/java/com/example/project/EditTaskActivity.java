@@ -4,7 +4,6 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,12 +13,14 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
-public class NewTaskActivity extends AppCompatActivity {
+public class EditTaskActivity extends AppCompatActivity {
 
     private EditText taskTitle, taskDescription;
-    private Button dueDateButton, dueTimeButton, saveTaskButton;
+    private Button dueDateButton, dueTimeButton, saveButton, cancelButton;
     private Spinner prioritySpinner;
     private Switch completionStatusSwitch;
 
@@ -27,25 +28,28 @@ public class NewTaskActivity extends AppCompatActivity {
     private int selectedHour, selectedMinute;
 
     private DataBaseHelper dbHelper;
+    private Task task;
+    Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_new_task);
+        setContentView(R.layout.activity_edit_task);
 
-        // Initialize UI components
-        taskTitle = findViewById(R.id.taskTitle);
-        taskDescription = findViewById(R.id.taskDescription);
-        dueDateButton = findViewById(R.id.dueDateButton);
-        dueTimeButton = findViewById(R.id.dueTimeButton);
-        saveTaskButton = findViewById(R.id.saveButton);
-        prioritySpinner = findViewById(R.id.prioritySpinner);
-        completionStatusSwitch = findViewById(R.id.completionStatusSwitch);
+        // Bind UI components
+        taskTitle = findViewById(R.id.editTaskTitle);
+        taskDescription = findViewById(R.id.editTaskDescription);
+        dueDateButton = findViewById(R.id.editDueDateButton);
+        dueTimeButton = findViewById(R.id.editDueTimeButton);
+        saveButton = findViewById(R.id.saveEditButton);
+        cancelButton = findViewById(R.id.cancelEditButton);
+        prioritySpinner = findViewById(R.id.editPrioritySpinner);
+        completionStatusSwitch = findViewById(R.id.editCompletionStatusSwitch);
 
         // Initialize Database Helper
         dbHelper = new DataBaseHelper(this);
 
-        // Initialize Spinner for priority levels
+        // Populate priority spinner
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.priority_options,
@@ -54,7 +58,7 @@ public class NewTaskActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         prioritySpinner.setAdapter(adapter);
 
-        // Initialize Calendar values
+        // Initialize calendar values
         Calendar calendar = Calendar.getInstance();
         selectedYear = calendar.get(Calendar.YEAR);
         selectedMonth = calendar.get(Calendar.MONTH);
@@ -62,10 +66,37 @@ public class NewTaskActivity extends AppCompatActivity {
         selectedHour = calendar.get(Calendar.HOUR_OF_DAY);
         selectedMinute = calendar.get(Calendar.MINUTE);
 
-        // Set button listeners
+        // Get the task object passed from the previous activity
+        task = (Task) getIntent().getSerializableExtra("task");
+        if (task != null) {
+            populateFields(task, adapter);
+        } else {
+            Toast.makeText(this, "Error: Task data is missing", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        // Set listeners for buttons
         dueDateButton.setOnClickListener(v -> showDatePickerDialog());
         dueTimeButton.setOnClickListener(v -> showTimePickerDialog());
-        saveTaskButton.setOnClickListener(v -> saveTask());
+        saveButton.setOnClickListener(v -> saveTask());
+        cancelButton.setOnClickListener(v -> finish());
+    }
+
+    private void populateFields(Task task, ArrayAdapter<CharSequence> adapter) {
+        taskTitle.setText(task.getTitle());
+        taskDescription.setText(task.getDescription());
+        completionStatusSwitch.setChecked(task.isCompleted());
+
+        // Populate spinner selection
+        int priorityPosition = adapter.getPosition(task.getPriority());
+        if (priorityPosition >= 0) {
+            prioritySpinner.setSelection(priorityPosition);
+        }
+
+        // Set due date and time
+        dueDateButton.setText(task.getDueDate());
+        dueTimeButton.setText(task.getDueTime());
     }
 
     private void showDatePickerDialog() {
@@ -105,23 +136,40 @@ public class NewTaskActivity extends AppCompatActivity {
         String dueDate = dueDateButton.getText().toString();
         String dueTime = dueTimeButton.getText().toString();
 
-        // Handle empty fields validation
         if (title.isEmpty() || description.isEmpty() || dueDate.equals("Select Date") || dueTime.equals("Select Time")) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Task updatedTask = new Task(
+                title, description, isCompleted, priority, dueDate, dueTime, task.getRemind(), task.getUserEmail()
+        );
+
+        boolean isUpdated = dbHelper.editTask(task, updatedTask);
+
+        if (isUpdated) {
+            Toast.makeText(this, "Task updated successfully!", Toast.LENGTH_SHORT).show();
+            getCurrentTaskState(updatedTask);
+            intent.putExtra("updatedTask", updatedTask);
+            setResult(RESULT_OK, intent);
+            finish();
         } else {
-            String userEmail = getIntent().getStringExtra("email");
+            Toast.makeText(this, "Error updating task", Toast.LENGTH_SHORT).show();
+        }
+    }
 
-            Task task = new Task(title, description, isCompleted, priority, dueDate,dueTime, 0, userEmail);
-            boolean isInserted = dbHelper.addTask(task);
+    public void getCurrentTaskState(Task task) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        String todayDate = dateFormat.format(new Date());
 
-            if (isInserted) {
-                Toast.makeText(this, "Task saved successfully!", Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(this, HomeActivity.class);
-                startActivity(intent);
-                finish(); // Close activity after saving
-            } else {
-                Toast.makeText(this, "Error saving task", Toast.LENGTH_SHORT).show();
-            }
+        if (task.getDueDate().equals(todayDate)) {
+            intent = new Intent(this,HomeActivity.class);
+        }
+        else if (task.isCompleted()) {
+            intent = new Intent(this,CompletedTasksActivity.class);
+        }
+        else{
+            intent = new Intent(this,AllTasksActivity.class);
         }
     }
 }

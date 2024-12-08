@@ -25,6 +25,7 @@ public class ConnectionAsyncTask extends AsyncTask<String, Void, List<Task>> {
     @Override
     protected void onPostExecute(List<Task> tasks) {
         super.onPostExecute(tasks);
-        taskActivity.setTasksToRecyclerView(tasks);  // Set tasks in the activity
+        taskActivity.setTasksToRecyclerView(tasks);
+        taskActivity.saveToDataBase(tasks);
     }
 }
