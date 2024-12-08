@@ -2,6 +2,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/today_background_color"
     android:padding="16dp">
 
     <!-- Title for Today's Tasks -->
@@ -27,13 +28,15 @@
         android:layout_marginBottom="16dp"
         android:background="@drawable/spinner_background"
         android:padding="8dp"
-        android:elevation="4dp">
+        android:elevation="4dp"
+        android:visibility="gone"> <!-- Hidden by default -->
 
         <Spinner
             android:id="@+id/sortSpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical" />
+            android:layout_gravity="center_vertical"
+            android:visibility="gone"/>
     </LinearLayout>
 
     <!-- Empty View for No Tasks -->
@@ -55,4 +58,13 @@
         android:layout_height="match_parent"
         android:layout_below="@id/sortContainer"
         android:clipToPadding="false" />
+
+    <!-- Congratulation Frame Animation -->
+    <ImageView
+        android:id="@+id/congratulationFrame"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:visibility="gone"
+        android:layout_centerInParent="true"
+        android:background="@drawable/congratulation_animation" /> <!-- Made smaller -->
 </RelativeLayout>

@@ -35,6 +35,6 @@
     <color name="input_hint_color">#B0B0B0</color> <!-- Light gray hints -->
     <color name="secondary_text_color">#B0B0B0</color>
     <color name="switch_text_color">#FFFFFF</color> <!-- White text for Switch -->
-
+    <color name="today_background_color">#000000</color>
 
 </resources>

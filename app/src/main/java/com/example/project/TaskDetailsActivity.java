@@ -8,10 +8,14 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class TaskDetailsActivity extends AppCompatActivity {
 
     private Task task; // Assuming Task is a serializable model class
     private DataBaseHelper dbHelper;
+    Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +27,8 @@ public class TaskDetailsActivity extends AppCompatActivity {
 
         // Get task object passed from intent
         task = (Task) getIntent().getSerializableExtra("task");
+
+        getCurrentTaskState(task);
 
         // Bind views
         TextView taskTitle = findViewById(R.id.taskTitle);
@@ -58,8 +64,8 @@ public class TaskDetailsActivity extends AppCompatActivity {
                 boolean isDeleted = dbHelper.deleteTask(dbHelper.getTaskId(task.getTitle(), task.getDueDate(), task.getDueTime()));
                 if (isDeleted) {
                     Toast.makeText(this, "Task deleted successfully", Toast.LENGTH_SHORT).show();
-                    Intent resultIntent = new Intent();
-                    setResult(RESULT_OK, resultIntent);
+                    setResult(RESULT_OK, intent);
+                    startActivity(intent);
                     finish();
                 } else {
                     Toast.makeText(this, "Failed to delete task", Toast.LENGTH_SHORT).show();
@@ -81,6 +87,10 @@ public class TaskDetailsActivity extends AppCompatActivity {
             } else {
                 Toast.makeText(this, "Task is already completed", Toast.LENGTH_SHORT).show();
             }
+
+            setResult(RESULT_OK, intent);
+            startActivity(intent);
+            finish();
         });
 
         // Share task
@@ -120,7 +130,25 @@ public class TaskDetailsActivity extends AppCompatActivity {
                         findViewById(R.id.taskDueTime),
                         findViewById(R.id.taskIsCompleted));
                 Toast.makeText(this, "Task updated successfully", Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK, intent);
+                startActivity(intent);
+                finish();
             }
+        }
+    }
+
+    public void getCurrentTaskState(Task task) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        String todayDate = dateFormat.format(new Date());
+
+        if (task.getDueDate().equals(todayDate)) {
+            intent = new Intent(this,HomeActivity.class);
+        }
+        else if (task.isCompleted()) {
+            intent = new Intent(this,CompletedTasksActivity.class);
+        }
+        else{
+            intent = new Intent(this,AllTasksActivity.class);
         }
     }
 }

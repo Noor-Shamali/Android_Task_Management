@@ -35,7 +35,7 @@
 
 
     <color name="primary_text_color">#6200EE</color> <!-- Purple for text -->
-
+    <color name="today_background_color">#FBFDFC</color>
     <color name="button_secondary_color">#03DAC5</color> <!-- Teal for secondary button -->
     <color name="title_text_color">#7B5D9D</color> <!-- Purple title -->
     <color name="label_text_color">#000000</color> <!-- Black labels -->
