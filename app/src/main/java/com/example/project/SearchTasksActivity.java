@@ -2,9 +2,12 @@ package com.example.project;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,9 +26,11 @@ public class SearchTasksActivity extends AppCompatActivity {
 
     private RecyclerView recyclerViewSearchTasks;
     private TextView startDateTextView, endDateTextView;
+    private EditText searchBar;
     private Button searchButton;
     private TaskAdapter taskAdapter;
     private SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+    private DataBaseHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,9 +40,11 @@ public class SearchTasksActivity extends AppCompatActivity {
         recyclerViewSearchTasks = findViewById(R.id.recyclerViewSearchTasks);
         startDateTextView = findViewById(R.id.start_date);
         endDateTextView = findViewById(R.id.end_date);
+        searchBar = findViewById(R.id.search_bar);
         searchButton = findViewById(R.id.search_button);
 
         recyclerViewSearchTasks.setLayoutManager(new LinearLayoutManager(this));
+        dbHelper = new DataBaseHelper(this);
 
         startDateTextView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,24 +65,17 @@ public class SearchTasksActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String startDateStr = startDateTextView.getText().toString();
                 String endDateStr = endDateTextView.getText().toString();
+                String keyword = searchBar.getText().toString();
 
-                if (startDateStr.isEmpty() || endDateStr.isEmpty()) {
-                    Toast.makeText(SearchTasksActivity.this, "Please enter both start and end dates", Toast.LENGTH_SHORT).show();
-                    return;
+                List<Task> filteredTasks = dbHelper.searchTasks(keyword, startDateStr, endDateStr);
+                if (filteredTasks.isEmpty()) {
+                    Toast.makeText(SearchTasksActivity.this, "No tasks found", Toast.LENGTH_SHORT).show();
                 }
-
-                try {
-                    Date startDate = sdf.parse(startDateStr);
-                    Date endDate = sdf.parse(endDateStr);
-
-                    if (startDate != null && endDate != null) {
-                        searchTasks(startDate, endDate);
-                    }
-                } catch (ParseException e) {
-                    Toast.makeText(SearchTasksActivity.this, "Invalid date format", Toast.LENGTH_SHORT).show();
-                }
+                taskAdapter = new TaskAdapter(filteredTasks);
+                recyclerViewSearchTasks.setAdapter(taskAdapter);
             }
         });
+
     }
 
     private void showDatePickerDialog(final TextView dateTextView) {
@@ -91,28 +91,4 @@ public class SearchTasksActivity extends AppCompatActivity {
         datePickerDialog.show();
     }
 
-    private void searchTasks(Date startDate, Date endDate) {
-        DataBaseHelper dbHelper = new DataBaseHelper(this);
-        List<Task> allTasks = dbHelper.getAllTasks();
-        List<Task> filteredTasks = new ArrayList<>();
-
-        for (Task task : allTasks) {
-            try {
-                Date taskDate = sdf.parse(task.getDueDate());
-
-                if (taskDate != null && !taskDate.before(startDate) && !taskDate.after(endDate)) {
-                    filteredTasks.add(task);
-                }
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (filteredTasks.isEmpty()) {
-            Toast.makeText(this, "No tasks found in the specified period", Toast.LENGTH_SHORT).show();
-        } else {
-            taskAdapter = new TaskAdapter(filteredTasks);
-            recyclerViewSearchTasks.setAdapter(taskAdapter);
-        }
-    }
 }

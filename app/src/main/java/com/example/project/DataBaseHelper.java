@@ -51,7 +51,7 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 + COLUMN_DESCRIPTION + " TEXT, "
                 + COLUMN_IS_COMPLETED + " INTEGER, "
                 + COLUMN_PRIORITY + " TEXT, "
-                + COLUMN_DUE_DATE + " TEXT, "
+                + COLUMN_DUE_DATE + " DATE, "
                 + COLUMN_DUE_TIME + " TEXT, "
                 + COLUMN_REMIND + " INTEGER, "
                 + COLUMN_USER_EMAIL + " TEXT)";
@@ -376,4 +376,47 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return taskId; // Returns the ID or -1 if not found
     }
 
+    public List<Task> searchTasks(String keyword, String startDate, String endDate) {
+        List<Task> tasks = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        StringBuilder queryBuilder = new StringBuilder("SELECT * FROM tasks WHERE 1=1");
+        List<String> argsList = new ArrayList<>();
+
+        if (!keyword.isEmpty()) {
+            queryBuilder.append(" AND (title LIKE ? OR description LIKE ?)");
+            argsList.add("%" + keyword + "%");
+            argsList.add("%" + keyword + "%");
+        }
+        if (!startDate.isEmpty()) {
+            queryBuilder.append(" AND dueDate >= ?");
+            argsList.add(startDate);
+        }
+        if (!endDate.isEmpty()) {
+            queryBuilder.append(" AND dueDate <= ?");
+            argsList.add(endDate);
+        }
+        String[] args = argsList.toArray(new String[0]);
+        Cursor cursor = db.rawQuery(queryBuilder.toString(), args);
+
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
+                String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE));
+                String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
+                boolean isCompleted = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED)) == 1;
+                String priority = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRIORITY));
+                String dueDate = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_DATE));
+                String dueTime = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_TIME));
+                int remind = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_REMIND));
+                String userEmail = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_EMAIL));
+
+                Task task = new Task(title, description, isCompleted, priority, dueDate, dueTime, remind, userEmail);
+                tasks.add(task);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return tasks;
+    }
 }
