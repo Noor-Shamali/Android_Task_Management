@@ -13,7 +13,7 @@ import java.util.List;
 public class DataBaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "Project.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     private static final String TABLE_USERS = "users";
     private static final String EMAIL = "email";
@@ -30,6 +30,11 @@ public class DataBaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_DUE_DATE = "dueDate";
     private static final String COLUMN_DUE_TIME = "dueTime";
     private static final String COLUMN_REMIND = "remind";
+    private static final String COLUMN_REMINDER_DATE = "reminderDate";
+    private static final String COLUMN_REMINDER_TIME = "reminderTime";
+    private static final String COLUMN_SNOOZE_STATUS = "snoozeStatus";
+    private static final String COLUMN_SNOOZE_TIME = "snoozedTime";
+    private static final String COLUMN_SNOOZE_REPEAT = "snoozeRepeat";
     private static final String COLUMN_USER_EMAIL = "userEmail";
 
     public DataBaseHelper(Context context) {
@@ -38,12 +43,12 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String createUsersTable = "CREATE TABLE " + TABLE_USERS + " ("
+        String CREATE_USERS_TABLE = "CREATE TABLE " + TABLE_USERS + " ("
                 + EMAIL + " TEXT PRIMARY KEY, "
                 + FIRST_NAME + " TEXT, "
                 + LAST_NAME + " TEXT, "
                 + PASSWORD + " TEXT);";
-        db.execSQL(createUsersTable);
+        db.execSQL(CREATE_USERS_TABLE);
 
         String CREATE_TASKS_TABLE = "CREATE TABLE " + TABLE_TASKS + " ("
                 + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -54,15 +59,17 @@ public class DataBaseHelper extends SQLiteOpenHelper {
                 + COLUMN_DUE_DATE + " DATE, "
                 + COLUMN_DUE_TIME + " TEXT, "
                 + COLUMN_REMIND + " INTEGER, "
-                + COLUMN_USER_EMAIL + " TEXT)";
+                + COLUMN_REMINDER_DATE + " TEXT, "
+                + COLUMN_REMINDER_TIME + " TEXT, "
+                + COLUMN_SNOOZE_STATUS + " INTEGER, "
+                + COLUMN_SNOOZE_TIME + " INTEGER, "
+                + COLUMN_SNOOZE_REPEAT + " INTEGER, "
+                + COLUMN_USER_EMAIL + " TEXT);";
         db.execSQL(CREATE_TASKS_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_USERS);
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TASKS);
-        onCreate(db);
     }
 
     public boolean addUser(String email, String firstName, String lastName, String password) {
@@ -80,8 +87,6 @@ public class DataBaseHelper extends SQLiteOpenHelper {
 
     public boolean addTask(Task task) {
         SQLiteDatabase db = this.getWritableDatabase();
-
-        // Create ContentValues object to hold task data
         ContentValues values = new ContentValues();
         values.put(COLUMN_TITLE, task.getTitle());
         values.put(COLUMN_DESCRIPTION, task.getDescription());
@@ -90,101 +95,239 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_DUE_DATE, task.getDueDate());
         values.put(COLUMN_DUE_TIME, task.getDueTime());
         values.put(COLUMN_REMIND, task.getRemind());
+        values.put(COLUMN_REMINDER_DATE, task.getReminderDate());
+        values.put(COLUMN_REMINDER_TIME, task.getReminderTime());
+        values.put(COLUMN_SNOOZE_STATUS, task.isSnoozed() ? 1 : 0);
+        values.put(COLUMN_SNOOZE_TIME, task.getSnoozedTime());
+        values.put(COLUMN_SNOOZE_REPEAT, task.getSnoozeRepeat());
         values.put(COLUMN_USER_EMAIL, task.getUserEmail());
 
-        // Insert the task into the database
         long result = db.insert(TABLE_TASKS, null, values);
-
         db.close();
-
-        // If result is -1, insertion failed, otherwise it was successful
         return result != -1;
     }
 
-
-    public boolean validateUser(String email, String password) {
+    public List<Task> getAllTasks() {
+        List<Task> taskList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM " + TABLE_USERS + " WHERE " + EMAIL + " = ? AND " + PASSWORD + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{email, password});
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_TASKS, null);
 
-        boolean isValid = cursor.getCount() > 0;
-        cursor.close();
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                Task task = new Task();
+                task.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)));
+                task.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)));
+                task.setCompleted(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED)) == 1);
+                task.setPriority(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRIORITY)));
+                task.setDueDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_DATE)));
+                task.setDueTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_TIME)));
+                task.setRemind(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_REMIND)));
+                task.setReminderDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REMINDER_DATE)));
+                task.setReminderTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REMINDER_TIME)));
+                task.setSnoozed(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_SNOOZE_STATUS)) == 1);
+                task.setSnoozedTime(cursor.getColumnIndexOrThrow(COLUMN_SNOOZE_TIME));
+                task.setSnoozeRepeat(cursor.getColumnIndexOrThrow(COLUMN_SNOOZE_REPEAT));
+                task.setUserEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_EMAIL)));
+
+                taskList.add(task);
+            }
+            cursor.close();
+        }
+
         db.close();
-        return isValid;
+        return taskList;
     }
 
-    public boolean isEmailUsed(String email) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM " + TABLE_USERS + " WHERE " + EMAIL + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{email});
+    public boolean editTask(Task oldTask, Task newTask) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_TITLE, newTask.getTitle());
+        values.put(COLUMN_DESCRIPTION, newTask.getDescription());
+        values.put(COLUMN_PRIORITY, newTask.getPriority());
+        values.put(COLUMN_DUE_DATE, newTask.getDueDate());
+        values.put(COLUMN_DUE_TIME, newTask.getDueTime());
+        values.put(COLUMN_REMIND, newTask.getRemind());
+        values.put(COLUMN_REMINDER_DATE, newTask.getReminderDate());
+        values.put(COLUMN_REMINDER_TIME, newTask.getReminderTime());
+        values.put(COLUMN_SNOOZE_STATUS, newTask.isSnoozed() ? 1 : 0);
+        values.put(COLUMN_SNOOZE_TIME, newTask.getSnoozedTime());
+        values.put(COLUMN_SNOOZE_REPEAT, newTask.getSnoozeRepeat());
+        values.put(COLUMN_IS_COMPLETED, newTask.isCompleted() ? 1 : 0);
 
-        boolean emailExists = cursor.getCount() > 0;
+        int rowsUpdated = db.update(TABLE_TASKS, values,
+                COLUMN_TITLE + " = ? AND " + COLUMN_DUE_DATE + " = ? AND " + COLUMN_DUE_TIME + " = ?",
+                new String[]{oldTask.getTitle(), oldTask.getDueDate(), oldTask.getDueTime()});
+
+        db.close();
+        return rowsUpdated > 0;
+    }
+
+    public boolean deleteTask(int taskId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        int rowsDeleted = db.delete(TABLE_TASKS, COLUMN_ID + " = ?", new String[]{String.valueOf(taskId)});
+        db.close();
+        return rowsDeleted > 0;
+    }
+
+    public boolean markTaskAsComplete(int taskId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_IS_COMPLETED, 1);
+
+        int rowsUpdated = db.update(TABLE_TASKS, values, COLUMN_ID + " = ?", new String[]{String.valueOf(taskId)});
+        db.close();
+        return rowsUpdated > 0;
+    }
+
+    public List<Task> searchTasks(String keyword, String startDate, String endDate) {
+        List<Task> tasks = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        StringBuilder queryBuilder = new StringBuilder("SELECT * FROM tasks WHERE 1=1");
+        List<String> argsList = new ArrayList<>();
+
+        if (!keyword.isEmpty()) {
+            queryBuilder.append(" AND (title LIKE ? OR description LIKE ?)");
+            argsList.add("%" + keyword + "%");
+            argsList.add("%" + keyword + "%");
+        }
+        if (!startDate.isEmpty()) {
+            queryBuilder.append(" AND dueDate >= ?");
+            argsList.add(startDate);
+        }
+        if (!endDate.isEmpty()) {
+            queryBuilder.append(" AND dueDate <= ?");
+            argsList.add(endDate);
+        }
+        String[] args = argsList.toArray(new String[0]);
+        Cursor cursor = db.rawQuery(queryBuilder.toString(), args);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Task task = new Task();
+                task.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)));
+                task.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)));
+                task.setCompleted(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED)) == 1);
+                task.setPriority(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRIORITY)));
+                task.setDueDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_DATE)));
+                task.setDueTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_TIME)));
+                task.setRemind(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_REMIND)));
+                task.setReminderDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REMINDER_DATE)));
+                task.setReminderTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REMINDER_TIME)));
+                task.setSnoozed(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_SNOOZE_STATUS)) == 1);
+                task.setSnoozedTime(cursor.getColumnIndexOrThrow(COLUMN_SNOOZE_TIME));
+                task.setSnoozeRepeat(cursor.getColumnIndexOrThrow(COLUMN_SNOOZE_REPEAT));
+                task.setUserEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_EMAIL)));
+
+                tasks.add(task);
+            } while (cursor.moveToNext());
+        }
         cursor.close();
         db.close();
-        return emailExists;
+        return tasks;
+    }
+
+    public int getTaskId(String title, String dueDate, String dueTime) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int taskId = -1; // Default value for not found
+
+        // Query to find the task's ID
+        String query = "SELECT " + COLUMN_ID + " FROM " + TABLE_TASKS +
+                " WHERE " + COLUMN_TITLE + " = ? AND " + COLUMN_DUE_DATE + " = ? AND " + COLUMN_DUE_TIME + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{title, dueDate, dueTime});
+
+        // Extract ID if the task exists
+        if (cursor != null && cursor.moveToFirst()) {
+            taskId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
+            cursor.close();
+        }
+
+        db.close();
+        return taskId; // Returns the ID or -1 if not found
+    }
+
+    public List<Task> getCompletedTasks() {
+        List<Task> taskList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM " + TABLE_TASKS + " WHERE " + COLUMN_IS_COMPLETED + " = 1";
+        Cursor cursor = db.rawQuery(query, null);
+
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                Task task = new Task();
+                task.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)));
+                task.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)));
+                task.setCompleted(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED)) == 1);
+                task.setPriority(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRIORITY)));
+                task.setDueDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_DATE)));
+                task.setDueTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_TIME)));
+                task.setRemind(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_REMIND)));
+                task.setReminderDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REMINDER_DATE)));
+                task.setReminderTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REMINDER_TIME)));
+                task.setSnoozed(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_SNOOZE_STATUS)) == 1);
+                task.setSnoozedTime(cursor.getColumnIndexOrThrow(COLUMN_SNOOZE_TIME));
+                task.setSnoozeRepeat(cursor.getColumnIndexOrThrow(COLUMN_SNOOZE_REPEAT));
+                task.setUserEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_EMAIL)));
+
+                taskList.add(task);
+            }
+            cursor.close();
+        }
+
+        db.close();
+        return taskList;
     }
 
     public List<Task> getTodaysTasks(String todayDate) {
         List<Task> taskList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
 
-        // Query to fetch tasks with today's date
-        String selectQuery = "SELECT * FROM " + TABLE_TASKS + " WHERE " + COLUMN_DUE_DATE + " = ?";
-        Cursor cursor = db.rawQuery(selectQuery, new String[]{todayDate});
+        String query = "SELECT * FROM " + TABLE_TASKS + " WHERE " + COLUMN_DUE_DATE + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{todayDate});
 
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
                 Task task = new Task();
-
-                // Safely check for column index and retrieve data
-                int titleIndex = cursor.getColumnIndex(COLUMN_TITLE);
-                if (titleIndex >= 0) {
-                    task.setTitle(cursor.getString(titleIndex));
-                }
-
-                int descriptionIndex = cursor.getColumnIndex(COLUMN_DESCRIPTION);
-                if (descriptionIndex >= 0) {
-                    task.setDescription(cursor.getString(descriptionIndex));
-                }
-
-                int isCompletedIndex = cursor.getColumnIndex(COLUMN_IS_COMPLETED);
-                if (isCompletedIndex >= 0) {
-                    task.setCompleted(cursor.getInt(isCompletedIndex) == 1);
-                }
-
-                int priorityIndex = cursor.getColumnIndex(COLUMN_PRIORITY);
-                if (priorityIndex >= 0) {
-                    task.setPriority(cursor.getString(priorityIndex));
-                }
-
-                int dueDateIndex = cursor.getColumnIndex(COLUMN_DUE_DATE);
-                if (dueDateIndex >= 0) {
-                    task.setDueDate(cursor.getString(dueDateIndex));
-                }
-
-                int dueTimeIndex = cursor.getColumnIndex(COLUMN_DUE_TIME);
-                if (dueTimeIndex >= 0) {
-                    task.setDueTime(cursor.getString(dueTimeIndex));
-                }
-
-                int remindIndex = cursor.getColumnIndex(COLUMN_REMIND);
-                if (remindIndex >= 0) {
-                    task.setRemind(cursor.getInt(remindIndex));
-                }
-
-                int userEmailIndex = cursor.getColumnIndex(COLUMN_USER_EMAIL);
-                if (userEmailIndex >= 0) {
-                    task.setUserEmail(cursor.getString(userEmailIndex));
-                }
+                task.setTitle(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE)));
+                task.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION)));
+                task.setCompleted(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED)) == 1);
+                task.setPriority(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRIORITY)));
+                task.setDueDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_DATE)));
+                task.setDueTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_TIME)));
+                task.setRemind(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_REMIND)));
+                task.setReminderDate(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REMINDER_DATE)));
+                task.setReminderTime(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_REMINDER_TIME)));
+                task.setSnoozed(cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_SNOOZE_STATUS)) == 1);
+                task.setSnoozedTime(cursor.getColumnIndexOrThrow(COLUMN_SNOOZE_TIME));
+                task.setSnoozeRepeat(cursor.getColumnIndexOrThrow(COLUMN_SNOOZE_REPEAT));
+                task.setUserEmail(cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_EMAIL)));
 
                 taskList.add(task);
-            } while (cursor.moveToNext());
-
+            }
             cursor.close();
         }
 
         db.close();
         return taskList;
+    }
+
+    public boolean isTaskStored(String title, String dueDate, String dueTime) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT COUNT(*) FROM " + TABLE_TASKS + " WHERE "
+                + COLUMN_TITLE + " = ? AND "
+                + COLUMN_DUE_DATE + " = ? AND "
+                + COLUMN_DUE_TIME + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{title, dueDate, dueTime});
+
+        boolean exists = false;
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
+                exists = cursor.getInt(0) > 0; // If count > 0, the task exists
+            }
+            cursor.close();
+        }
+        db.close();
+        return exists;
     }
 
     public String getUserName(String email) {
@@ -217,84 +360,15 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         db.close();
         return userName;
     }
-
-    public List<Task> getAllTasks() {
-        List<Task> taskList = new ArrayList<>();
+    public boolean isEmailUsed(String email) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_TASKS, null);
+        String query = "SELECT * FROM " + TABLE_USERS + " WHERE " + EMAIL + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{email});
 
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                // Extract task data from cursor
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
-                String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE));
-                String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
-                boolean isCompleted = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED)) == 1;
-                String priority = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRIORITY));
-                String dueDate = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_DATE));
-                String dueTime = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_TIME));
-                int remind = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_REMIND));
-                String userEmail = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_EMAIL));
-
-                // Create Task object and add to list
-                Task task = new Task(title, description, isCompleted, priority, dueDate, dueTime, remind, userEmail);
-                taskList.add(task);
-            }
-            cursor.close();
-        }
-
+        boolean emailExists = cursor.getCount() > 0;
+        cursor.close();
         db.close();
-        return taskList;
-    }
-
-    public boolean isTaskStored(String title, String dueDate, String dueTime) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT COUNT(*) FROM " + TABLE_TASKS + " WHERE "
-                + COLUMN_TITLE + " = ? AND "
-                + COLUMN_DUE_DATE + " = ? AND "
-                + COLUMN_DUE_TIME + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{title, dueDate, dueTime});
-
-        boolean exists = false;
-        if (cursor != null) {
-            if (cursor.moveToFirst()) {
-                exists = cursor.getInt(0) > 0; // If count > 0, the task exists
-            }
-            cursor.close();
-        }
-        db.close();
-        return exists;
-    }
-
-    public List<Task> getCompletedTasks() {
-        List<Task> taskList = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM " + TABLE_TASKS + " WHERE " + COLUMN_IS_COMPLETED + " = 1";
-
-        Cursor cursor = db.rawQuery(query, null);
-
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                // Extract task data from cursor
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
-                String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE));
-                String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
-                boolean isCompleted = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED)) == 1;
-                String priority = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRIORITY));
-                String dueDate = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_DATE));
-                String dueTime = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_TIME));
-                int remind = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_REMIND));
-                String userEmail = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_EMAIL));
-
-                // Create Task object and add to list
-                Task task = new Task(title, description, isCompleted, priority, dueDate, dueTime, remind, userEmail);
-                taskList.add(task);
-            }
-            cursor.close();
-        }
-
-        db.close();
-        return taskList;
+        return emailExists;
     }
 
     public boolean updateEmail(String oldEmail, String newEmail) {
@@ -317,106 +391,14 @@ public class DataBaseHelper extends SQLiteOpenHelper {
         return rowsAffected > 0;
     }
 
-    public boolean deleteTask(int taskId) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        int rowsDeleted = db.delete(TABLE_TASKS, COLUMN_ID + " = ?", new String[]{String.valueOf(taskId)});
-        db.close();
-        return rowsDeleted > 0; // Returns true if at least one row was deleted
-    }
-
-    public boolean markTaskAsComplete(int taskId) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_IS_COMPLETED, 1); // 1 indicates the task is completed
-
-        int rowsUpdated = db.update(TABLE_TASKS, values, COLUMN_ID + " = ?", new String[]{String.valueOf(taskId)});
-        db.close();
-        return rowsUpdated > 0; // Returns true if at least one row was updated
-    }
-    public boolean editTask(Task oldTask, Task newTask) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        // Prepare the new values to update
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_TITLE, newTask.getTitle());
-        values.put(COLUMN_DESCRIPTION, newTask.getDescription());
-        values.put(COLUMN_PRIORITY, newTask.getPriority());
-        values.put(COLUMN_DUE_DATE, newTask.getDueDate());
-        values.put(COLUMN_DUE_TIME, newTask.getDueTime());
-        values.put(COLUMN_REMIND, newTask.getRemind());
-        values.put(COLUMN_IS_COMPLETED, newTask.isCompleted() ? 1 : 0);
-
-        // Update the task by matching old task details (using title, due date, and due time as identifiers)
-        int rowsUpdated = db.update(
-                TABLE_TASKS,
-                values,
-                COLUMN_TITLE + " = ? AND " + COLUMN_DUE_DATE + " = ? AND " + COLUMN_DUE_TIME + " = ?",
-                new String[]{oldTask.getTitle(), oldTask.getDueDate(), oldTask.getDueTime()}
-        );
-
-        db.close();
-        return rowsUpdated > 0; // Returns true if at least one row was updated
-    }
-    public int getTaskId(String title, String dueDate, String dueTime) {
+    public boolean validateUser(String email, String password) {
         SQLiteDatabase db = this.getReadableDatabase();
-        int taskId = -1; // Default value for not found
+        String query = "SELECT * FROM " + TABLE_USERS + " WHERE " + EMAIL + " = ? AND " + PASSWORD + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{email, password});
 
-        // Query to find the task's ID
-        String query = "SELECT " + COLUMN_ID + " FROM " + TABLE_TASKS +
-                " WHERE " + COLUMN_TITLE + " = ? AND " + COLUMN_DUE_DATE + " = ? AND " + COLUMN_DUE_TIME + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{title, dueDate, dueTime});
-
-        // Extract ID if the task exists
-        if (cursor != null && cursor.moveToFirst()) {
-            taskId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
-            cursor.close();
-        }
-
-        db.close();
-        return taskId; // Returns the ID or -1 if not found
-    }
-
-    public List<Task> searchTasks(String keyword, String startDate, String endDate) {
-        List<Task> tasks = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        StringBuilder queryBuilder = new StringBuilder("SELECT * FROM tasks WHERE 1=1");
-        List<String> argsList = new ArrayList<>();
-
-        if (!keyword.isEmpty()) {
-            queryBuilder.append(" AND (title LIKE ? OR description LIKE ?)");
-            argsList.add("%" + keyword + "%");
-            argsList.add("%" + keyword + "%");
-        }
-        if (!startDate.isEmpty()) {
-            queryBuilder.append(" AND dueDate >= ?");
-            argsList.add(startDate);
-        }
-        if (!endDate.isEmpty()) {
-            queryBuilder.append(" AND dueDate <= ?");
-            argsList.add(endDate);
-        }
-        String[] args = argsList.toArray(new String[0]);
-        Cursor cursor = db.rawQuery(queryBuilder.toString(), args);
-
-        if (cursor.moveToFirst()) {
-            do {
-                int id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_ID));
-                String title = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_TITLE));
-                String description = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DESCRIPTION));
-                boolean isCompleted = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_IS_COMPLETED)) == 1;
-                String priority = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRIORITY));
-                String dueDate = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_DATE));
-                String dueTime = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DUE_TIME));
-                int remind = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_REMIND));
-                String userEmail = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USER_EMAIL));
-
-                Task task = new Task(title, description, isCompleted, priority, dueDate, dueTime, remind, userEmail);
-                tasks.add(task);
-            } while (cursor.moveToNext());
-        }
+        boolean isValid = cursor.getCount() > 0;
         cursor.close();
         db.close();
-        return tasks;
+        return isValid;
     }
 }

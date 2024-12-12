@@ -20,8 +20,8 @@ import java.util.Date;
 public class EditTaskActivity extends AppCompatActivity {
 
     private EditText taskTitle, taskDescription;
-    private Button dueDateButton, dueTimeButton, saveButton, cancelButton;
-    private Spinner prioritySpinner;
+    private Button dueDateButton, dueTimeButton, saveButton, cancelButton, editReminderDate, editReminderTime;
+    private Spinner prioritySpinner, snoozeIntervalSpinner, snoozeRepeatSpinner;
     private Switch completionStatusSwitch;
 
     private int selectedYear, selectedMonth, selectedDay;
@@ -29,7 +29,7 @@ public class EditTaskActivity extends AppCompatActivity {
 
     private DataBaseHelper dbHelper;
     private Task task;
-    Intent intent;
+    private Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +45,17 @@ public class EditTaskActivity extends AppCompatActivity {
         cancelButton = findViewById(R.id.cancelEditButton);
         prioritySpinner = findViewById(R.id.editPrioritySpinner);
         completionStatusSwitch = findViewById(R.id.editCompletionStatusSwitch);
+        editReminderDate = findViewById(R.id.editReminderDateButton);
+        editReminderTime = findViewById(R.id.editReminderTimeButton);
+        snoozeIntervalSpinner = findViewById(R.id.snoozeIntervalSpinner);
+        snoozeRepeatSpinner = findViewById(R.id.snoozeRepeatSpinner);
 
         // Initialize Database Helper
         dbHelper = new DataBaseHelper(this);
+
+        // Populate Spinners
+        initializeSpinner(snoozeIntervalSpinner, R.array.snooze_intervals);
+        initializeSpinner(snoozeRepeatSpinner, R.array.snooze_repeats);
 
         // Populate priority spinner
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
@@ -77,10 +85,22 @@ public class EditTaskActivity extends AppCompatActivity {
         }
 
         // Set listeners for buttons
-        dueDateButton.setOnClickListener(v -> showDatePickerDialog());
-        dueTimeButton.setOnClickListener(v -> showTimePickerDialog());
+        dueDateButton.setOnClickListener(v -> showDatePickerDialog(dueDateButton));
+        dueTimeButton.setOnClickListener(v -> showTimePickerDialog(dueTimeButton));
+        editReminderDate.setOnClickListener(v -> showDatePickerDialog(editReminderDate));
+        editReminderTime.setOnClickListener(v -> showTimePickerDialog(editReminderTime));
         saveButton.setOnClickListener(v -> saveTask());
         cancelButton.setOnClickListener(v -> finish());
+    }
+
+    private void initializeSpinner(Spinner spinner, int arrayResourceId) {
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                this,
+                arrayResourceId,
+                android.R.layout.simple_spinner_item
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
     }
 
     private void populateFields(Task task, ArrayAdapter<CharSequence> adapter) {
@@ -99,33 +119,25 @@ public class EditTaskActivity extends AppCompatActivity {
         dueTimeButton.setText(task.getDueTime());
     }
 
-    private void showDatePickerDialog() {
+    private void showDatePickerDialog(Button button) {
         DatePickerDialog datePickerDialog = new DatePickerDialog(this,
                 (view, year, month, dayOfMonth) -> {
                     selectedYear = year;
                     selectedMonth = month;
                     selectedDay = dayOfMonth;
-                    updateDateButton();
+                    button.setText(String.format("%02d/%02d/%04d", selectedDay, selectedMonth + 1, selectedYear));
                 }, selectedYear, selectedMonth, selectedDay);
         datePickerDialog.show();
     }
 
-    private void updateDateButton() {
-        dueDateButton.setText(String.format("%02d/%02d/%04d", selectedDay, selectedMonth + 1, selectedYear));
-    }
-
-    private void showTimePickerDialog() {
+    private void showTimePickerDialog(Button button) {
         TimePickerDialog timePickerDialog = new TimePickerDialog(this,
                 (view, hourOfDay, minute) -> {
                     selectedHour = hourOfDay;
                     selectedMinute = minute;
-                    updateTimeButton();
+                    button.setText(String.format("%02d:%02d", selectedHour, selectedMinute));
                 }, selectedHour, selectedMinute, true);
         timePickerDialog.show();
-    }
-
-    private void updateTimeButton() {
-        dueTimeButton.setText(String.format("%02d:%02d", selectedHour, selectedMinute));
     }
 
     private void saveTask() {
@@ -135,15 +147,18 @@ public class EditTaskActivity extends AppCompatActivity {
         boolean isCompleted = completionStatusSwitch.isChecked();
         String dueDate = dueDateButton.getText().toString();
         String dueTime = dueTimeButton.getText().toString();
+        String reminderDate = editReminderDate.getText().toString();
+        String reminderTime = editReminderTime.getText().toString();
+        boolean snoozed = false;
+        int snoozeInterval = getSnoozeInterval();
+        int snoozeRepeat = getSnoozeRepeat();
 
         if (title.isEmpty() || description.isEmpty() || dueDate.equals("Select Date") || dueTime.equals("Select Time")) {
             Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        Task updatedTask = new Task(
-                title, description, isCompleted, priority, dueDate, dueTime, task.getRemind(), task.getUserEmail()
-        );
+        Task updatedTask = new Task(title, description, isCompleted, priority, dueDate, dueTime, task.getRemind(), task.getUserEmail(), reminderDate, reminderTime, snoozed, snoozeInterval, snoozeRepeat);
 
         boolean isUpdated = dbHelper.editTask(task, updatedTask);
 
@@ -158,18 +173,46 @@ public class EditTaskActivity extends AppCompatActivity {
         }
     }
 
-    public void getCurrentTaskState(Task task) {
+    private void getCurrentTaskState(Task task) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         String todayDate = dateFormat.format(new Date());
 
         if (task.getDueDate().equals(todayDate)) {
-            intent = new Intent(this,HomeActivity.class);
+            intent = new Intent(this, HomeActivity.class);
+        } else if (task.isCompleted()) {
+            intent = new Intent(this, CompletedTasksActivity.class);
+        } else {
+            intent = new Intent(this, AllTasksActivity.class);
         }
-        else if (task.isCompleted()) {
-            intent = new Intent(this,CompletedTasksActivity.class);
+    }
+
+    private int getSnoozeInterval() {
+        String selectedInterval = snoozeIntervalSpinner.getSelectedItem().toString();
+        switch (selectedInterval) {
+            case "5 minutes":
+                return 5;
+            case "10 minutes":
+                return 10;
+            case "15 minutes":
+                return 15;
+            case "30 minutes":
+                return 30;
+            default:
+                return 0; // Default value if none selected
         }
-        else{
-            intent = new Intent(this,AllTasksActivity.class);
+    }
+
+    private int getSnoozeRepeat() {
+        String selectedRepeat = snoozeRepeatSpinner.getSelectedItem().toString();
+        switch (selectedRepeat) {
+            case "1 time":
+                return 1;
+            case "3 times":
+                return 3;
+            case "5 times":
+                return 5;
+            default:
+                return 0;
         }
     }
 }

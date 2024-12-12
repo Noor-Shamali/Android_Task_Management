@@ -23,6 +23,11 @@ public class TaskJsonParser {
                 task.setDueDate(jsonObject.getString("dueDate"));
                 task.setDueTime(jsonObject.getString("dueTime"));
                 task.setRemind(jsonObject.getInt("remind"));
+                task.setReminderDate(jsonObject.getString("reminderDate"));
+                task.setReminderTime(jsonObject.getString("reminderTime"));
+                task.setSnoozed(jsonObject.getBoolean("snoozed"));
+                task.setSnoozedTime(jsonObject.getInt("snoozedTime"));
+                task.setSnoozeRepeat(jsonObject.getInt("snoozeRepeat"));
                 tasks.add(task);
             }
         } catch (JSONException e) {
