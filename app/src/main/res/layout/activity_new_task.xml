@@ -2,19 +2,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="12dp"
-    android:background="#FFFFFF">
+    android:padding="12dp">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="New Task"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:textColor="#7B5D9D"
-        android:layout_marginBottom="20dp" />
-
+    <!-- Task Title -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -28,10 +18,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Enter task title"
-        android:background="@drawable/input_field"
         android:padding="10dp"
         android:textSize="14sp" />
 
+    <!-- Task Description -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -46,11 +36,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Enter task description"
-        android:background="@drawable/input_field"
         android:padding="10dp"
         android:minLines="3"
         android:textSize="14sp" />
 
+    <!-- Due Date and Time -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -63,10 +53,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Select Date"
-            android:background="@drawable/button_style"
-            android:textColor="#FFFFFF"
-            android:padding="8dp"
-            android:textSize="14sp" />
+            android:padding="8dp" />
 
         <Button
             android:id="@+id/dueTimeButton"
@@ -75,29 +62,27 @@
             android:layout_weight="1"
             android:layout_marginStart="8dp"
             android:text="Select Time"
-            android:background="@drawable/button_style"
-            android:textColor="#FFFFFF"
-            android:padding="8dp"
-            android:textSize="14sp" />
+            android:padding="8dp" />
     </LinearLayout>
 
+    <!-- Priority -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Priority Level"
         android:textSize="16sp"
-        android:textStyle="bold"
         android:layout_marginTop="12dp"
-        android:layout_marginBottom="6dp" />
+        android:layout_marginBottom="6dp"
+        android:textColor="@color/label_text_color" />
 
     <Spinner
         android:id="@+id/prioritySpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/spinner_style"
-        android:padding="8dp"
-        android:textSize="14sp" />
+        android:padding="8dp" />
 
+    <!-- Completion Status -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -105,97 +90,58 @@
         android:textSize="16sp"
         android:textStyle="bold"
         android:layout_marginTop="12dp"
-        android:layout_marginBottom="6dp" />
+        android:layout_marginBottom="6dp"
+        android:textColor="@color/label_text_color" />
+
 
     <Switch
         android:id="@+id/completionStatusSwitch"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Mark as Complete"
-        android:padding="8dp"
-        android:textSize="14sp" />
+        android:text="Mark as Complete" />
 
+    <!-- Reminder Date and Time -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
         android:layout_marginTop="12dp">
 
-        <ImageView
-            android:id="@+id/reminderIcon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_reminder"
-            android:contentDescription="Reminder Icon" />
-
-        <TextView
-            android:layout_width="wrap_content"
+        <Button
+            android:id="@+id/ReminderDateButton"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Reminder"
-            android:textSize="16sp"
-            android:layout_marginStart="8dp" />
+            android:layout_weight="1"
+            android:text="Select Date"
+            android:padding="8dp"
+            android:backgroundTint="@color/button_primary_color"
+            android:textColor="@color/button_text_color"/>
+
+        <Button
+            android:id="@+id/ReminderTimeButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:text="Select Time"
+            android:padding="8dp"
+            android:backgroundTint="@color/button_primary_color"
+            android:textColor="@color/button_text_color"/>
     </LinearLayout>
 
-    <LinearLayout
+    <!-- Include Snooze Options -->
+    <include
+        layout="@layout/snooze_options"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_marginTop="12dp">
+        android:layout_height="wrap_content" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center">
-
-            <ImageView
-                android:id="@+id/editIcon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_edit"
-                android:contentDescription="Edit Icon" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Edit"
-                android:gravity="center" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:layout_marginStart="32dp">
-
-            <ImageView
-                android:id="@+id/deleteIcon"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_delete"
-                android:contentDescription="Delete Icon" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Delete"
-                android:gravity="center" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <Space
-        android:layout_width="match_parent"
-        android:layout_height="50dp" />
-
+    <!-- Save Button -->
     <Button
         android:id="@+id/saveButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Save Task"
-        android:textColor="#FFFFFF" />
-
+        android:layout_marginTop="20dp"
+        android:padding="12dp" />
 
 </LinearLayout>

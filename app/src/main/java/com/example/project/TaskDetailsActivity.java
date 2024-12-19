@@ -1,47 +1,181 @@
 package com.example.project;
 
-import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.TimePickerDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 public class TaskDetailsActivity extends AppCompatActivity {
 
-    @SuppressLint("SetTextI18n")
+    private Task task; // Assuming Task is a serializable model class
+    private DataBaseHelper dbHelper;
+    Intent intent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_details);
 
-        // Get the task passed from the adapter
-        Task task = (Task) getIntent().getSerializableExtra("task");
+        // Initialize database helper
+        dbHelper = new DataBaseHelper(this);
 
-        // Initialize views
+        // Get task object passed from intent
+        task = (Task) getIntent().getSerializableExtra("task");
+
+        getCurrentTaskState(task);
+
+
+        // Bind views
         TextView taskTitle = findViewById(R.id.taskTitle);
         TextView taskDescription = findViewById(R.id.taskDescription);
         TextView taskDueDate = findViewById(R.id.taskDueDate);
         TextView taskPriority = findViewById(R.id.taskPriority);
-        TextView taskDueTime = findViewById(R.id.taskDueTime);  // Fixed: Corrected to dueTime instead of startTime
+        TextView taskDueTime = findViewById(R.id.taskDueTime);
         TextView taskIsCompleted = findViewById(R.id.taskIsCompleted);
+        Button editButton = findViewById(R.id.btnEditTask);
+        Button deleteButton = findViewById(R.id.btnDeleteTask);
+        Button markAsCompleteButton = findViewById(R.id.btnMarkAsComplete);
+        Button shareButton = findViewById(R.id.btnShareTask);
 
-        // Check if task is null to prevent crashes
+        // Check if task is null
         if (task != null) {
-            // Set task details to the views
-            taskTitle.setText(task.getTitle() != null ? task.getTitle() : "No title available");
-            taskDescription.setText(task.getDescription() != null ? task.getDescription() : "No description available");
-            taskDueDate.setText(task.getDueDate() != null ? task.getDueDate() : "No due date available");
-            taskPriority.setText(task.getPriority() != null ? task.getPriority() : "No priority available");
-            taskDueTime.setText(task.getDueTime() != null ? task.getDueTime() : "No due time available");
-            taskIsCompleted.setText(task.isCompleted() ? "Completed" : "Not Completed");
+            displayTaskDetails(task, taskTitle, taskDescription, taskDueDate, taskPriority, taskDueTime, taskIsCompleted);
         } else {
-            // Handle the case where the task is null (in case the intent doesn't pass a task object)
-            taskTitle.setText("No task available");
-            taskDescription.setText("No task details available");
-            taskDueDate.setText("No task details available");
-            taskPriority.setText("No task details available");
-            taskDueTime.setText("No task details available");
-            taskIsCompleted.setText("No task details available");
+            Toast.makeText(this, "Task details are not available", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
+        // Edit task
+        editButton.setOnClickListener(v -> {
+            Intent intent = new Intent(TaskDetailsActivity.this, EditTaskActivity.class);
+            intent.putExtra("task", task); // Pass the task to the edit activity
+            startActivityForResult(intent, 100); // Use startActivityForResult to handle updates
+        });
+
+        // Delete task
+        deleteButton.setOnClickListener(v -> {
+            if (task != null) {
+                boolean isDeleted = dbHelper.deleteTask(dbHelper.getTaskId(task.getTitle(), task.getDueDate(), task.getDueTime()));
+                if (isDeleted) {
+                    Toast.makeText(this, "Task deleted successfully", Toast.LENGTH_SHORT).show();
+                    setResult(RESULT_OK, intent);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(this, "Failed to delete task", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        // Mark task as complete
+        markAsCompleteButton.setOnClickListener(v -> {
+            if (task != null && !task.isCompleted()) {
+                task.setCompleted(true);
+                boolean isUpdated = dbHelper.markTaskAsComplete(dbHelper.getTaskId(task.getTitle(), task.getDueDate(), task.getDueTime()));
+                if (isUpdated) {
+                    taskIsCompleted.setText("Completed");
+                    Toast.makeText(this, "Task marked as completed", Toast.LENGTH_SHORT).show();
+                    // send congratulation message when all today tasks are completed
+                    if (areAllTodayTasksCompleted()) {
+                        Toast.makeText(this, "Congratulations! All tasks for today are completed!", Toast.LENGTH_LONG).show();
+
+                    }
+                } else {
+                    Toast.makeText(this, "Failed to mark task as completed", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(this, "Task is already completed", Toast.LENGTH_SHORT).show();
+            }
+
+            setResult(RESULT_OK, intent);
+            startActivity(intent);
+            finish();
+        });
+
+        // Share task
+        shareButton.setOnClickListener(v -> {
+            if (task != null) {
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_TEXT, "Task: " + task.getTitle() + "\nDescription: " + task.getDescription());
+                startActivity(Intent.createChooser(shareIntent, "Share Task via"));
+            }
+        });
+
+    }
+    private boolean areAllTodayTasksCompleted() {
+        List<Task> todayTasks = dbHelper.getTodaysTasks(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
+        for (Task t : todayTasks) {
+            if (!t.isCompleted()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Display task details in the UI
+    private void displayTaskDetails(Task task, TextView taskTitle, TextView taskDescription, TextView taskDueDate, TextView taskPriority, TextView taskDueTime, TextView taskIsCompleted) {
+        taskTitle.setText(task.getTitle());
+        taskDescription.setText(task.getDescription());
+        taskDueDate.setText(task.getDueDate());
+        taskPriority.setText(task.getPriority());
+        taskDueTime.setText(task.getDueTime());
+        taskIsCompleted.setText(task.isCompleted() ? "Completed" : "Not Completed");
+    }
+
+    // Handle result from EditTaskActivity
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 100 && resultCode == RESULT_OK) {
+            task = (Task) data.getSerializableExtra("updatedTask");
+            if (task != null) {
+                // Refresh task details after editing
+                displayTaskDetails(task,
+                        findViewById(R.id.taskTitle),
+                        findViewById(R.id.taskDescription),
+                        findViewById(R.id.taskDueDate),
+                        findViewById(R.id.taskPriority),
+                        findViewById(R.id.taskDueTime),
+                        findViewById(R.id.taskIsCompleted));
+                Toast.makeText(this, "Task updated successfully", Toast.LENGTH_SHORT).show();
+                setResult(RESULT_OK, intent);
+                startActivity(intent);
+                finish();
+            }
+        }
+    }
+
+    public void getCurrentTaskState(Task task) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        String todayDate = dateFormat.format(new Date());
+
+        if (task.getDueDate().equals(todayDate)) {
+            intent = new Intent(this,HomeActivity.class);
+        }
+        else if (task.isCompleted()) {
+            intent = new Intent(this,CompletedTasksActivity.class);
+        }
+        else{
+            intent = new Intent(this,AllTasksActivity.class);
         }
     }
 }

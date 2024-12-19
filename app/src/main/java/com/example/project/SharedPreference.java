@@ -30,4 +30,13 @@ public class SharedPreference {
         editor.remove(KEY_EMAIL);
         editor.commit();
     }
+
+    public boolean writeDarkMode(String key, boolean value) {
+        editor.putBoolean(key, value);
+        return editor.commit();
+    }
+
+    public boolean readDarkMode(String key, boolean defaultValue) {
+        return sharedPreferences.getBoolean(key, defaultValue);
+    }
 }
