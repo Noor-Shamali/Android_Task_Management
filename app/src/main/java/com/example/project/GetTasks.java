@@ -27,7 +27,7 @@ public class GetTasks extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         ConnectionAsyncTask connectionAsyncTask = new ConnectionAsyncTask(this);
-        connectionAsyncTask.execute("https://mocki.io/v1/b60a63e1-2462-4599-990b-9f6c8d6b832c");
+        connectionAsyncTask.execute("https://mocki.io/v1/05959841-09d8-4d49-a0e8-6cd0d4e75c13");
 
     }
 
