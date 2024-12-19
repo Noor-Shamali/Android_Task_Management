@@ -42,6 +42,7 @@ public class TaskDetailsActivity extends AppCompatActivity {
 
         getCurrentTaskState(task);
 
+
         // Bind views
         TextView taskTitle = findViewById(R.id.taskTitle);
         TextView taskDescription = findViewById(R.id.taskDescription);
